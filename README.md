@@ -1,5 +1,7 @@
 # WIK-DPS-TP02
 
+Ce TP a été effectué en se basant sur le code du repositorie https://github.com/Sarvagon/WIK-DPS-TP01-Rust-Version
+
 # Optimisation des images docker.
 
 ## 1 - Docker Single stage for the rust api :
@@ -7,11 +9,7 @@
 ### 1.1 - Methode 1 : Utilisation du buildkit de docker
 
 
-> Pour optimiser le temps de build, on va mettre en cache les dossier de build. Le fait de mettre 
-> en cache permet d'eviter une recompilation complète.
-> Les dossier en question sont les suivants :
->  - cargo/registry : contient les dépendances téléchargées 
->  - target : contient les dépendances compilées 
+> Pour optimiser le temps de build, on va mettre en cache les dossiers de build :
 
 ```dockerfile
 FROM rust
@@ -30,15 +28,13 @@ CMD ["cargo", "run", "--release"]
 
 
 
-> Une fois l'image ecrite comme si dessus, il faut preciser a docker de build l'image avec la commande suivante :
+> Une fois l'image ecrite on demande à docker de construire l'image :
 
 ```bash
 DOCKER_BUILDKIT=1 docker build --progress=plain --tag rust-api .
 ```
 
-> Le flag `DOCKER_BUILDKIT=1` permet d'activer le buildkit de docker, pour mettre en cache les dossiers de build.
-
-Pour lancer l'image, il suffit de faire la commande suivante :
+La commande de lancement de l'image est :
 
 ```bash
 docker run -p 8080:8080 rust-api
@@ -346,26 +342,11 @@ api          1  0.0  0.0   4336   728 ?        Ss   15:05   0:00 ./app
 
 ### Analyse de l'image 
 
-Grace a plusieurs outils, on peut analyser notre image à la recherche de failles de sécurité.
-l'outil utilisé ici est trivy.
+Analyse de l'image en utilisant Trivy :
     
 ```bash 
 sudo triy rust-api
 ```
 
 
-le rapport de trivy nous indique que notre image comporte les faille suivante : LOW: 10, MEDIUM: 47, HIGH: 42, CRITICAL: 5
-Ce qui est beaucoup trop.
-
-# Bonus
-
-Creation d'une image docker la plus petite possible, qui affiche en console les nombre de 0 à 10000.
-
-Pour cela dans un premier temps, on va crée un programme en langage d'assembleur
- afin d'avoir un programme le plus léger possible.
-
-### 1 - Boucle + affichage
-
-On va créer un programme en assembleur qui affiche les nombres de 0 à 10000.
-
-```asm
+Trivy rapporte énormament de failles de notre image : LOW: 10, MEDIUM: 47, HIGH: 42, CRITICAL: 5
